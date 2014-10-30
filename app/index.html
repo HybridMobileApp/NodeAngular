@@ -1,0 +1,64 @@
+<!doctype html>
+<html ng-app="myApp">
+  <head>
+    <title>Socket.IO chat</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular.min.js"></script>
+    <script src="ng-socket-io.js"></script>
+    <style>
+    
+    </style>
+  </head>
+  <body>
+  <div ng-controller = "MyCtrl">
+   <ul>
+       <li ng-repeat = "i in todos">{{ i.text }}</li>
+      <input type="text" ng-model="message" ng-enter="emit(message)"/>
+    </ul>  
+      <button ng-click = "emit(message)"> shout</button>
+  </div>
+  
+  </body>
+
+<script>
+
+
+var myApp = angular.module('myApp', ['socket-io']);
+    myApp.controller('MyCtrl', function($scope, socket) {
+        // Listening to an event
+        
+        $scope.emit = function ( message ){
+          socket.emit('chat message',message);
+          $scope.message = "";
+        }
+        $scope.todos = [
+              {text:'AngularJS', done:false}         
+              
+            ];
+        socket.on('chat message', function(data) {
+          console.log(data);
+          $scope.todos.push({text:data, done:false});
+        });
+
+        // Raising an event
+        $scope.raise = function(message) {            
+            socket.emit('otherEvent', message);
+        };
+    });
+
+  myApp.directive('ngEnter', function () {
+    return function (scope, element, attrs) {
+        element.bind("keydown keypress", function (event) {
+            if(event.which === 13) {
+                scope.$apply(function (){
+                    scope.$eval(attrs.ngEnter);
+                });
+
+                event.preventDefault();
+            }
+        });
+    };
+});
+
+</script>
+</html>
